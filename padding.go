@@ -1,8 +1,8 @@
 package padding
 
 import (
-	"bytes"
-	"errors"
+    "bytes"
+    "errors"
 )
 
 func last (arr []byte) byte {
@@ -11,8 +11,8 @@ func last (arr []byte) byte {
 }
 
 func droplast (arr []byte) []byte {
-	last_i := len(arr) - 1
-	return arr[:last_i]
+    last_i := len(arr) - 1
+    return arr[:last_i]
 }
 
 func allEqual(arr []byte, val byte) bool {
@@ -27,37 +27,37 @@ func allEqual(arr []byte, val byte) bool {
 // Padding means adding bytes at the end of a byte array such that
 // its length becomes an exact multiple of a given block size.
 
-func maybePadded(buf []byte, blockSize int) (bool, error) {
-    bufLen := len(buf)
+func maybePadded(data []byte, blockSize int) (bool, error) {
+    dataLen := len(data)
     err := "padding: array is not padded to the given block size"
     
-	if (bufLen % blockSize) != 0 {
+    if (dataLen % blockSize) != 0 {
         return false, errors.New(err)
-	}
-	return true, nil
+    }
+    return true, nil
 }
 
 type Padder func([]byte, int) []byte
 type Unpadder func([]byte) ([]byte, error)
 
 // pad and the unpad are inverses.
-// Their composition should leave the input buffer invariant
+// Their composition should leave the input datafer invariant
 
 func pad(data []byte, blockSize int, padder Padder) ([]byte, error) {
     padding := padder(data, blockSize)
-	return append(data, padding...), nil
+    return append(data, padding...), nil
 }
 
 func unpad(data []byte, blockSize int, unpadder Unpadder) ([]byte, error) {
     _, err := maybePadded(data, blockSize)
-	if (err != nil) {
-		return nil, err
-	}
+    if (err != nil) {
+        return nil, err
+    }
     
     unpadded, err := unpadder(data)
-	if err != nil {
+    if err != nil {
         return nil, err
-	}
+    }
 
     return unpadded, nil
 }
@@ -69,30 +69,30 @@ func unpad(data []byte, blockSize int, unpadder Unpadder) ([]byte, error) {
 // block size, the array will be padded with a full block.
 
 func padPkcs5(data []byte) ([]byte, error) {
-	blockSize := 8
-	return pad(data, blockSize, pkcsPadder)
+    blockSize := 8
+    return pad(data, blockSize, pkcsPadder)
 }
 
 func pkcsPadder(data []byte, blockSize int) []byte {
-	dataLen := len(data)
-	padLen := blockSize - (dataLen % blockSize)
-	padding := bytes.Repeat([]byte{byte(padLen)}, padLen)
-	return padding
+    dataLen := len(data)
+    padLen := blockSize - (dataLen % blockSize)
+    padding := bytes.Repeat([]byte{byte(padLen)}, padLen)
+    return padding
 }
 
-func pkcsUnpadder(buf []byte) ([]byte, error) {
+func pkcsUnpadder(data []byte) ([]byte, error) {
     err := "padding: input array is not PKCS-padded"
-	bufLen := len(buf)
-	last_i := bufLen - 1
-	paddingOctet := buf[last_i]
-	padLen := int(paddingOctet)
+    dataLen := len(data)
+    last_i := dataLen - 1
+    paddingOctet := data[last_i]
+    padLen := int(paddingOctet)
 	
-	if padLen > bufLen {
-		return nil, errors.New(err)
-	}
+    if padLen > dataLen {
+        return nil, errors.New(err)
+    }
 
-    if allEqual(buf[bufLen-padLen:], paddingOctet) {
-        return buf[:bufLen-padLen], nil
+    if allEqual(data[dataLen-padLen:], paddingOctet) {
+        return data[:dataLen-padLen], nil
     }
     return nil, errors.New(err)
 }
@@ -101,13 +101,15 @@ func pkcsUnpadder(buf []byte) ([]byte, error) {
 // The remaining padding octets are 0x00.
 
 func iso7816Padder(data []byte, blockSize int) []byte {
-	dataLen := len(data)
-	padLen := (dataLen % blockSize)
-	padding := []byte{}
-	if padLen > 0 {
-	    padding = append([]byte{byte(0x80)}, bytes.Repeat([]byte{byte(0)}, padLen-1)...)
+    dataLen := len(data)
+    padLen := (dataLen % blockSize)
+    padding := []byte{}
+
+    if padLen > 0 {
+        padding = append([]byte{byte(0x80)}, bytes.Repeat([]byte{byte(0)}, padLen-1)...)
     }
-	return padding
+
+    return padding
 }
 
 func iso7816Unpadder(arr []byte) ([]byte, error) {

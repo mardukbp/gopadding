@@ -40,15 +40,15 @@ func maybePadded(data []byte, blockSize int) (bool, error) {
 type Padder func([]byte, int) []byte
 type Unpadder func([]byte) ([]byte, error)
 
-// Pad and Unpad are inverses.
+// pad and unpad are inverses.
 // Their composition should leave the input datafer invariant
 
-func Pad(data []byte, blockSize int, padder Padder) []byte {
+func pad(data []byte, blockSize int, padder Padder) []byte {
 	padding := padder(data, blockSize)
 	return append(data, padding...)
 }
 
-func Unpad(data []byte, blockSize int, unpadder Unpadder) ([]byte, error) {
+func unpad(data []byte, blockSize int, unpadder Unpadder) ([]byte, error) {
 	_, err := maybePadded(data, blockSize)
 	if err != nil {
 		return nil, err
@@ -70,7 +70,20 @@ func Unpad(data []byte, blockSize int, unpadder Unpadder) ([]byte, error) {
 
 func PadPkcs5(data []byte) []byte {
 	blockSize := 8
-	return Pad(data, blockSize, PkcsPadder)
+	return pad(data, blockSize, PkcsPadder)
+}
+
+func UnpadPkcs5(data []byte) ([]byte, error) {
+	blockSize := 8
+	return unpad(data, blockSize, PkcsUnpadder)
+}
+
+func PadPkcs7(data []byte, blockSize int) []byte {
+	return pad(data, blockSize, PkcsPadder)
+}
+
+func UnpadPkcs7(data []byte, blockSize int) ([]byte, error) {
+	return unpad(data, blockSize, PkcsUnpadder)
 }
 
 func PkcsPadder(data []byte, blockSize int) []byte {
@@ -123,4 +136,12 @@ func Iso7816Unpadder(arr []byte) ([]byte, error) {
 	}
 
 	return nil, errors.New(err)
+}
+
+func PadIso7816(data []byte, blockSize int) []byte {
+	return pad(data, blockSize, Iso7816Padder)
+}
+
+func UnpadIso7816(data []byte, blockSize int) ([]byte, error) {
+	return unpad(data, blockSize, Iso7816Unpadder)
 }

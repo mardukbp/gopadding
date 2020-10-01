@@ -1,3 +1,3 @@
-module github.com/mardukbp/gopadding
+module github.com/mardukbp/padding
 
 go 1.14

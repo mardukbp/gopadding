@@ -8,9 +8,9 @@ func ExamplePad() {
 	input := []byte{0x12, 0xae, 0x45, 0x04}
 	fmt.Println(hex.EncodeToString(input))
 	blockSize := 8
-	output,_ := Pad(input, blockSize, PkcsPadder)
+	output := Pad(input, blockSize, PkcsPadder)
 	fmt.Println(hex.EncodeToString(output))
-	output,_ = Pad(input, blockSize, Iso7816Padder)
+	output = Pad(input, blockSize, Iso7816Padder)
 	fmt.Println(hex.EncodeToString(output))
 	// Output:
 	// 12ae4504
@@ -39,10 +39,10 @@ func ExampleGroupProperty() {
 	input := []byte{0x12, 0xae, 0x45, 0x04}
 	fmt.Println(hex.EncodeToString(input))
 	blockSize := 8
-	padded,_ := Pad(input, blockSize, Iso7816Padder)
+	padded := Pad(input, blockSize, Iso7816Padder)
 	output,_ := Unpad(padded, blockSize, Iso7816Unpadder)
 	fmt.Println(hex.EncodeToString(output))
-	padded,_ = Pad(input, blockSize, PkcsPadder)
+	padded = Pad(input, blockSize, PkcsPadder)
 	output,_ = Unpad(padded, blockSize, PkcsUnpadder)
 	fmt.Println(hex.EncodeToString(output))
 	// Output:

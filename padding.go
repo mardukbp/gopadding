@@ -40,12 +40,12 @@ func maybePadded(data []byte, blockSize int) (bool, error) {
 type Padder func([]byte, int) []byte
 type Unpadder func([]byte) ([]byte, error)
 
-// pad and the unpad are inverses.
+// Pad and Unpad are inverses.
 // Their composition should leave the input datafer invariant
 
-func Pad(data []byte, blockSize int, padder Padder) ([]byte, error) {
+func Pad(data []byte, blockSize int, padder Padder) []byte {
 	padding := padder(data, blockSize)
-	return append(data, padding...), nil
+	return append(data, padding...)
 }
 
 func Unpad(data []byte, blockSize int, unpadder Unpadder) ([]byte, error) {
@@ -68,7 +68,7 @@ func Unpad(data []byte, blockSize int, unpadder Unpadder) ([]byte, error) {
 // If the length of the input array is an exact multiple of the
 // block size, the array will be padded with a full block.
 
-func PadPkcs5(data []byte) ([]byte, error) {
+func PadPkcs5(data []byte) []byte {
 	blockSize := 8
 	return Pad(data, blockSize, PkcsPadder)
 }

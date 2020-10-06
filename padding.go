@@ -27,16 +27,6 @@ func allEqual(arr []byte, val byte) bool {
 // Padding means adding bytes at the end of a byte array such that
 // its length becomes an exact multiple of a given block size.
 
-func maybePadded(data []byte, blockSize int) (bool, error) {
-	dataLen := len(data)
-	err := "padding: array is not padded to the given block size"
-
-	if (dataLen % blockSize) != 0 {
-		return false, errors.New(err)
-	}
-	return true, nil
-}
-
 type Padder func(int) []byte
 type Unpadder func([]byte) ([]byte, error)
 
@@ -51,16 +41,18 @@ func pad(data []byte, blockSize int, padder Padder) []byte {
 }
 
 func unpad(data []byte, blockSize int, unpadder Unpadder) ([]byte, error) {
-	_, err := maybePadded(data, blockSize)
-	if err != nil {
-		return nil, err
+	if len(data) == 0 {
+		return nil, errors.New("padding:unpad Input array is empty")
+	}
+	
+	if (len(data) % blockSize) != 0 {
+		return nil, errors.New("padding:unpad Input array is not padded")
 	}
 
 	unpadded, err := unpadder(data)
 	if err != nil {
 		return nil, err
 	}
-
 	return unpadded, nil
 }
 

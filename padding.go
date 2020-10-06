@@ -37,14 +37,16 @@ func maybePadded(data []byte, blockSize int) (bool, error) {
 	return true, nil
 }
 
-type Padder func([]byte, int) []byte
+type Padder func(int) []byte
 type Unpadder func([]byte) ([]byte, error)
 
 // pad and unpad are inverses.
 // Their composition should leave the input datafer invariant
 
 func pad(data []byte, blockSize int, padder Padder) []byte {
-	padding := padder(data, blockSize)
+  	dataLen := len(data)
+	padLen := blockSize - (dataLen % blockSize)
+	padding := padder(padLen)
 	return append(data, padding...)
 }
 
@@ -86,11 +88,8 @@ func UnpadPkcs7(data []byte, blockSize int) ([]byte, error) {
 	return unpad(data, blockSize, PkcsUnpadder)
 }
 
-func PkcsPadder(data []byte, blockSize int) []byte {
-	dataLen := len(data)
-	padLen := blockSize - (dataLen % blockSize)
-	padding := bytes.Repeat([]byte{byte(padLen)}, padLen)
-	return padding
+func PkcsPadder(padLen int) []byte {
+	return bytes.Repeat([]byte{byte(padLen)}, padLen)
 }
 
 func PkcsUnpadder(data []byte) ([]byte, error) {
@@ -113,16 +112,9 @@ func PkcsUnpadder(data []byte) ([]byte, error) {
 // In ISO 7816-4 padding the first padding octet is 0x80.
 // The remaining padding octets are 0x00.
 
-func Iso7816Padder(data []byte, blockSize int) []byte {
-	dataLen := len(data)
-	padLen := (dataLen % blockSize)
-	padding := []byte{}
-
-	if padLen > 0 {
-		padding = append([]byte{byte(0x80)}, 
-		                 bytes.Repeat([]byte{byte(0)}, padLen-1)...)
-	}
-
+func Iso7816Padder(padLen int) []byte {
+	padding := append([]byte{byte(0x80)}, 
+	                  bytes.Repeat([]byte{byte(0)}, padLen-1)...)
 	return padding
 }
 

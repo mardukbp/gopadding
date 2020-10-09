@@ -3,6 +3,8 @@ package padding
 import (
 	"bytes"
 	"errors"
+	"fmt"
+	"log"
 )
 
 func last(arr []byte) byte {
@@ -41,19 +43,26 @@ func pad(data []byte, blockSize int, padder Padder) []byte {
 }
 
 func unpad(data []byte, blockSize int, unpadder Unpadder) ([]byte, error) {
-	if len(data) == 0 {
-		return nil, errors.New("padding:unpad Input array is empty")
-	}
-	
-	if (len(data) % blockSize) != 0 {
-		return nil, errors.New("padding:unpad Input array is not padded")
-	}
+	VerifyPadding(data, blockSize)
 
-	unpadded, err := unpadder(data)
+	unpadded, err := unpadder(data)	
 	if err != nil {
 		return nil, err
 	}
 	return unpadded, nil
+}
+
+func VerifyPadding(array []byte, blockSize int) {
+
+	if len(array) == 0 {
+		log.Fatal("The input array is empty")
+	}
+
+	err := fmt.Sprintf("The input array's length is not divisible by %d", 
+			           blockSize)
+	if (len(array) % blockSize) != 0 {
+		log.Fatal(err)
+	}
 }
 
 // In PKCS padding N octets of value N are appended to the input

@@ -53,12 +53,11 @@ func unpad(data []byte, blockSize int, unpadder Unpadder) ([]byte, error) {
 }
 
 func VerifyPadding(array []byte, blockSize int) {
-
 	if len(array) == 0 {
 		log.Fatal("The input array is empty")
 	}
 
-	err := fmt.Sprintf("The input array's length is not divisible by %d", 
+	err := fmt.Sprintf("padding: The input array's length is not divisible by %d", 
 			           blockSize)
 	if (len(array) % blockSize) != 0 {
 		log.Fatal(err)
